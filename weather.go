@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
@@ -30,13 +31,13 @@ func printWeather(res *http.Response) {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		slog.Error(err.Error())
 	}
 
 	var weather Weather
 	err = json.Unmarshal(body, &weather)
 	if err != nil {
-		panic(err)
+		slog.Error(err.Error())
 	}
 
 	location, current := weather.Location, weather.Current

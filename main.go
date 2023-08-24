@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -11,8 +11,8 @@ func main() {
 
 	key := os.Getenv("WEATHERAPI_KEY")
 	if key == "" {
-		fmt.Println("The environment variable WEATHERAPI_KEY is not set!\nSet this variable and try again.\n\nFor more informations read https://www.weatherapi.com/docs.")
-		os.Exit(1)
+		slog.Error("The environment variable WEATHERAPI_KEY is not set!\nSet this variable and try again.\n\nFor more informations read https://www.weatherapi.com/docs.")
+		return
 	}
 
 	var location *string
@@ -20,23 +20,23 @@ func main() {
 	flag.Parse()
 
 	if *location == "" {
-		fmt.Println("The location is not set!")
-		os.Exit(0)
+		slog.Error("The location is not set!")
+		return
 	}
 
 	res, err := http.Get("http://api.weatherapi.com/v1/current.json?key=" + key + "&q=" + *location)
 	if err != nil {
-		panic(err)
+		slog.Error(err.Error())
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 400 && res.StatusCode <= 410 {
 		printAPIError(res)
-		os.Exit(0)
+		return
 	}
 
 	if res.StatusCode != 200 {
-		panic("Weather API not available")
+		slog.Error("Weather API not available")
 	}
 
 	printWeather(res)

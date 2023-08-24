@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
 type Error struct {
 	Code    uint16 `json:"code"`
-	Massage string `json:"message"`
+	Message string `json:"message"`
 }
 
 type ErrBody struct {
@@ -19,13 +19,13 @@ type ErrBody struct {
 func printAPIError(res *http.Response) {
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		slog.Error(err.Error())
 	}
 
 	var errBody ErrBody
 	err = json.Unmarshal(body, &errBody)
 	if err != nil {
-		panic(err)
+		slog.Error(err.Error())
 	}
-	fmt.Printf("Error code: %d\nError message: %s\n", errBody.Code, errBody.Massage)
+	slog.Error("Error returned from API", "errcode", errBody.Code, "errmessage", errBody.Message)
 }
